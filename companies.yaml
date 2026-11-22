@@ -1,0 +1,12 @@
+# Companies to ingest. Each entry needs a board token that works on that board's public API.
+#   name:   how the company is shown and stored
+#   source: greenhouse | lever | ashby
+#   token:  the board token / slug from the company's job-board URL
+#   active: set to false to skip without deleting the entry
+companies:
+  - { name: Stripe,                 source: greenhouse, token: stripe }
+  - { name: HeyGen,                 source: greenhouse, token: heygen }
+  - { name: Geotab (Internship List), source: greenhouse, token: internshiplist2000 }
+  - { name: Kepler Communications,  source: lever,      token: kepler }
+  - { name: Zip,                    source: ashby,      token: zip }
+  - { name: Veeda AI,               source: ashby,      token: veeda-ai }
