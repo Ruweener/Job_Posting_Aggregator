@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.fetchers import greenhouse, lever
+from app.fetchers import ashby, greenhouse, lever
 from app.filters import detect_term, is_internship
 from app.models import Posting
 from app.schemas import NormalizedPosting
@@ -22,8 +22,8 @@ log = logging.getLogger("ingest")
 
 COMPANIES_FILE = Path(__file__).resolve().parent.parent / "companies.yaml"
 
-# source name -> module with fetch() and parse(). Ashby is added in Step 8.
-FETCHERS = {"greenhouse": greenhouse, "lever": lever}
+# source name -> module with fetch() and parse(). Adding a board = one module + one entry here.
+FETCHERS = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby}
 
 DELAY_BETWEEN_COMPANIES = 1.0  # seconds; be polite to the public APIs
 USER_AGENT = "internship-posting-aggregator/0.1 (personal project)"

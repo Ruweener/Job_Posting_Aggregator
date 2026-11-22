@@ -1,0 +1,167 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "31d097db-83ac-4a6d-9520-8dc29a8dbe08",
+      "title": "Internship",
+      "department": "Technical Staff",
+      "team": "Technical Staff",
+      "employmentType": "FullTime",
+      "location": "Toronto",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "secondaryLocations": [
+        {
+          "location": "Z\u00fcrich",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Z\u00fcrich",
+              "addressCountry": "Switzerland",
+              "addressLocality": "Z\u00fcrich"
+            }
+          }
+        },
+        {
+          "location": "Seattle",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Washington",
+              "addressCountry": "United States of America",
+              "addressLocality": "Seattle"
+            }
+          }
+        },
+        {
+          "location": "California",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "United States",
+              "addressCountry": "United States of America",
+              "addressLocality": "California"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2026-08-19T16:32:58.601+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Hybrid",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "Ontario",
+          "addressCountry": "Canada",
+          "addressLocality": "Toronto"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/veeda-ai/31d097db-83ac-4a6d-9520-8dc29a8dbe08",
+      "applyUrl": "https://jobs.ashbyhq.com/veeda-ai/31d097db-83ac-4a6d-9520-8dc29a8dbe08/application",
+      "descriptionHtml": "<p style=\"min-height:1.5em\"><strong>ABOUT US</strong></p><div style=\"min-height:1.2em;margin-top:0px;margin-bottom:0px\">\u00a0</div><p style=\"min-height:1.5em\">Veeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.</p",
+      "descriptionPlain": "ABOUT US\n\n\u00a0\n\nVeeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.\n\n\u00a0\n\nRESPONSIBILITIES\n\n\u00a0\n\n - Own one scoped project in a single area \u2014 ML Performance, AI Infrastructure, ML Operations, Data, Robotics, Simulati"
+    },
+    {
+      "id": "84dfad5c-d790-4c4a-9411-40b676b1abbb",
+      "title": "Internship - Software Engineering",
+      "department": "Product Engineering",
+      "team": "Product Engineering",
+      "employmentType": "PartTime",
+      "location": "Toronto",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "secondaryLocations": [],
+      "publishedAt": "2026-10-22T21:00:38.551+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Hybrid",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "Ontario",
+          "addressCountry": "Canada",
+          "addressLocality": "Toronto"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/veeda-ai/84dfad5c-d790-4c4a-9411-40b676b1abbb",
+      "applyUrl": "https://jobs.ashbyhq.com/veeda-ai/84dfad5c-d790-4c4a-9411-40b676b1abbb/application",
+      "descriptionHtml": "<p style=\"min-height:1.5em\"><strong>ABOUT US</strong></p><div style=\"min-height:1.2em;margin-top:0px;margin-bottom:0px\">\u00a0</div><p style=\"min-height:1.5em\">Veeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.</p",
+      "descriptionPlain": "ABOUT US\n\n\u00a0\n\nVeeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.\n\n\u00a0\n\nRESPONSIBILITIES\n\n\u00a0\n\n - Develop data ETL, data lake and other data toolings that processes hundreds TBs of data\n\n - Develop use friendly fro"
+    },
+    {
+      "id": "399ecbcf-dbe1-4245-b36e-c4c5a6583dea",
+      "title": "Member of Technical Staff - ML Operations",
+      "department": "Technical Staff",
+      "team": "Technical Staff",
+      "employmentType": "FullTime",
+      "location": "Toronto",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "secondaryLocations": [
+        {
+          "location": "Z\u00fcrich",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Z\u00fcrich",
+              "addressCountry": "Switzerland",
+              "addressLocality": "Z\u00fcrich"
+            }
+          }
+        },
+        {
+          "location": "Seattle",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Washington",
+              "addressCountry": "United States of America",
+              "addressLocality": "Seattle"
+            }
+          }
+        },
+        {
+          "location": "California",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "United States",
+              "addressCountry": "United States of America",
+              "addressLocality": "California"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2026-09-04T19:42:23.648+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Hybrid",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "Ontario",
+          "addressCountry": "Canada",
+          "addressLocality": "Toronto"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/veeda-ai/399ecbcf-dbe1-4245-b36e-c4c5a6583dea",
+      "applyUrl": "https://jobs.ashbyhq.com/veeda-ai/399ecbcf-dbe1-4245-b36e-c4c5a6583dea/application",
+      "descriptionHtml": "<h1><strong>ABOUT US</strong></h1><p style=\"min-height:1.5em\">Veeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.</p><p style=\"min-height:1.5em\"></p><h2><strong>RESPONSIBILITIES</strong></h2><ul style=\"min-hei",
+      "descriptionPlain": "ABOUT US\n\nVeeda AI is building the next generation of multimodal foundation world models for Physical AI. We're a small, fast-moving team of engineers and researchers from leading AI labs, tackling some of the most challenging problems at the intersection of AI, robotics, and embodied intelligence. If you're excited about pushing the boundaries of what's possible with Physical AI, you'll have the opportunity to make an outsized impact from day one.\n\n\n\n\nRESPONSIBILITIES\n\n - Experiment Lifecycle Tracking and Tooling: Design, build and deploy tools that own how a run is defined, launched, resumed"
+    },
+    {
+      "id": "92c2b94a-3963-4c1e-8e5a-b83f548f8f0d",
+      "title": "Solution Engineer (Pre-Sales)",
+      "department": "Pre-Sales",
+      "team": "Pre-Sales",
+      "employmentType": "FullTime",
+      "location": "Remote - West Coast",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "secondaryLocations": [],
+      "publishedAt": "2026-11-12T22:37:31.353+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "California",
+          "addressCountry": "United States",
+          "addressLocality": "Los Angeles, San Francisco"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/zip/92c2b94a-3963-4c1e-8e5a-b83f548f8f0d",
+      "applyUrl": "https://jobs.ashbyhq.com/zip/92c2b94a-3963-4c1e-8e5a-b83f548f8f0d/application",
+      "descriptionHtml": "<h1><strong>About Zip</strong></h1><p style=\"min-height:1.5em\">Zip is the AI platform for enterprise procurement \u2014 built for humans and agents working together. By orchestrating procurement across teams, tools, and suppliers with the help of AI agents, companies can secure the resources they need to innovate faster than ever before.<br /><br />The world\u2019s most influential enterprises trust Zip, including T-Mobile, OpenAI, AMD, Mars, Dollar Tree, and more. Together they\u2019ve saved over $8 billion and processed over $500 billion in spend. Zip\u2019s team includes product leaders from Apple, Airbnb, and",
+      "descriptionPlain": "ABOUT ZIP\n\nZip is the AI platform for enterprise procurement \u2014 built for humans and agents working together. By orchestrating procurement across teams, tools, and suppliers with the help of AI agents, companies can secure the resources they need to innovate faster than ever before.\n\nThe world\u2019s most influential enterprises trust Zip, including T-Mobile, OpenAI, AMD, Mars, Dollar Tree, and more. Together they\u2019ve saved over $8 billion and processed over $500 billion in spend. Zip\u2019s team includes product leaders from Apple, Airbnb, and Meta, as well as former procurement leaders from United Healt"
+    }
+  ]
+}
