@@ -1,5 +1,7 @@
 # Internship Posting Aggregator
 
+[![CI](https://github.com/Ruweener/Job_Posting_Aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/Ruweener/Job_Posting_Aggregator/actions/workflows/ci.yml)
+
 A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.

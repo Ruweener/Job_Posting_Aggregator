@@ -1,0 +1,63 @@
+name: CI
+
+# Run on every push to any branch, and on pull requests into main
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+# If you push twice quickly, cancel the older run instead of running both
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # A throwaway Postgres 16 that exists only for this job. Credentials are not secret:
+    # the database is deleted when the job ends and is only reachable from this runner.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: jobagg
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: jobagg
+        ports:
+          - 5432:5432
+        # Don't start the steps until Postgres is accepting connections
+        options: >-
+          --health-cmd "pg_isready -U jobagg"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://jobagg:ci-only-password@localhost:5432/jobagg
+      TEST_DATABASE_URL: postgresql+psycopg://jobagg:ci-only-password@localhost:5432/jobagg_test
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip                      # reuse downloaded packages between runs
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply migrations to an empty database
+        run: alembic upgrade head
+
+      - name: Check models and migrations match
+        # Fails if a model was changed without generating a migration for it
+        run: alembic check
+
+      - name: Run tests
+        run: pytest -v
