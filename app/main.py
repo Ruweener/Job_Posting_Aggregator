@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api import postings
+from app.api import postings, stats
 from app.api.deps import get_db
 
 app = FastAPI(
@@ -25,3 +25,4 @@ def health(db: Session = Depends(get_db)) -> dict:
 
 
 app.include_router(postings.router)
+app.include_router(stats.router)
