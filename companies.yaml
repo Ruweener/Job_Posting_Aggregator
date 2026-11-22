@@ -1,12 +1,33 @@
-# Companies to ingest. Each entry needs a board token that works on that board's public API.
+# Companies to ingest. Every token below was checked against the live public API (Nov 2026).
 #   name:   how the company is shown and stored
 #   source: greenhouse | lever | ashby
 #   token:  the board token / slug from the company's job-board URL
 #   active: set to false to skip without deleting the entry
 companies:
-  - { name: Stripe,                 source: greenhouse, token: stripe }
-  - { name: HeyGen,                 source: greenhouse, token: heygen }
+  # --- Canada-based, or posting Canadian internships ---
+  - { name: Cohere,                   source: ashby,      token: cohere }
+  - { name: Hootsuite,                source: greenhouse, token: hootsuite }
+  - { name: Geotab,                   source: greenhouse, token: geotab }
   - { name: Geotab (Internship List), source: greenhouse, token: internshiplist2000 }
-  - { name: Kepler Communications,  source: lever,      token: kepler }
-  - { name: Zip,                    source: ashby,      token: zip }
-  - { name: Veeda AI,               source: ashby,      token: veeda-ai }
+  - { name: Kepler Communications,    source: lever,      token: kepler }
+  - { name: Veeda AI,                 source: ashby,      token: veeda-ai }
+  - { name: Wealthsimple,             source: ashby,      token: wealthsimple }
+  - { name: 1Password,                source: ashby,      token: 1password }
+  - { name: PointClickCare,           source: lever,      token: pointclickcare }
+  - { name: D2L,                      source: greenhouse, token: d2l }
+  - { name: Faire,                    source: greenhouse, token: faire }
+  - { name: Tenstorrent,              source: greenhouse, token: tenstorrent }
+
+  # --- Large intern programs (some Toronto/Vancouver roles, mostly US) ---
+  - { name: Stripe,                   source: greenhouse, token: stripe }
+  - { name: Databricks,               source: greenhouse, token: databricks }
+  - { name: Figma,                    source: greenhouse, token: figma }
+  - { name: Coinbase,                 source: greenhouse, token: coinbase }
+  - { name: Cloudflare,               source: greenhouse, token: cloudflare }
+  - { name: Samsara,                  source: greenhouse, token: samsara }
+  - { name: Ramp,                     source: ashby,      token: ramp }
+  - { name: Notion,                   source: ashby,      token: notion }
+
+  # --- From the original starter list; no internships posted when checked ---
+  - { name: HeyGen,                   source: greenhouse, token: heygen }
+  - { name: Zip,                      source: ashby,      token: zip }

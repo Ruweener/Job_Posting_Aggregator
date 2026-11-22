@@ -66,6 +66,18 @@ def test_detect_term_ignores_graduation_dates():
     assert detect_term("Data Analyst, Intern", text) == "Unknown"
 
 
+def test_detect_term_ignores_degree_completion_dates():
+    # Real Samsara wording (Step 9)
+    text = ("Complete a Bachelor's degree in Computer Science, Mathematics, Software Engineering, "
+            "Physics, or Data Science between Spring/Summer/Fall 2028 or Winter 2029.")
+    assert detect_term("Software Engineering Internship - San Francisco", text) == "Unknown"
+
+
+def test_graduation_check_stays_within_one_sentence():
+    text = "Applicants must be graduating soon. This internship runs Summer 2027."
+    assert detect_term("Software Intern", text) == "Summer 2027"
+
+
 def test_detect_term_handles_season_of_year_and_skips_later_graduation_date():
     text = ("We are excited to offer internships for the summer of 2027. Candidates should have "
             "the expectation of graduating in winter 2027 or spring/summer 2028.")

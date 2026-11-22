@@ -24,9 +24,18 @@ _MONTH_TO_SEASON = {
 _SEASON_RE = re.compile(r"\b(winter|spring|summer|fall)\b(?:\s*/\s*[a-z]+)?\s+(?:of\s+)?(20\d{2})\b", re.IGNORECASE)
 # "January 2027", "(May 2027)"
 _MONTH_RE = re.compile(r"\b(" + "|".join(_MONTH_TO_SEASON) + r")\s+(?:of\s+)?(20\d{2})\b", re.IGNORECASE)
-# Descriptions often say "graduating in December 2027 or spring/summer 2028". Those dates
-# are graduation dates, not the internship term, so skip matches shortly after "graduat...".
-_GRADUATION_RE = re.compile(r"graduat\w*\W+(?:\w+\W+){0,6}$", re.IGNORECASE)
+# Descriptions often say "graduating in December 2027 or spring/summer 2028" or "complete a
+# Bachelor's degree in CS ... between Spring/Summer/Fall 2028". Those are graduation dates,
+# not the internship term, so skip a date that shares its sentence with "graduat..." or "degree".
+_GRADUATION_RE = re.compile(r"\b(graduat\w*|degree)\b", re.IGNORECASE)
+_SENTENCE_BREAK_RE = re.compile(r"[.!?\n]")
+
+
+def _is_graduation_date(text: str, start: int) -> bool:
+    """Look back up to 300 characters, but only within the current sentence."""
+    window = text[max(0, start - 300):start]
+    sentence = _SENTENCE_BREAK_RE.split(window)[-1]
+    return bool(_GRADUATION_RE.search(sentence))
 
 
 def _term_in(text: str) -> str | None:
@@ -37,8 +46,7 @@ def _term_in(text: str) -> str | None:
     for m in _MONTH_RE.finditer(text):
         candidates.append((m.start(), f"{_MONTH_TO_SEASON[m.group(1).lower()]} {m.group(2)}"))
     for start, term in sorted(candidates):  # sorted by position in the text
-        # Look at up to 60 characters before the match for a graduation phrase
-        if not _GRADUATION_RE.search(text[max(0, start - 60):start]):
+        if not _is_graduation_date(text, start):
             return term
     return None
 
