@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api import postings
 from app.api.deps import get_db
 
 app = FastAPI(
@@ -21,3 +22,6 @@ def health(db: Session = Depends(get_db)) -> dict:
     """Liveness check that also proves the database is reachable."""
     db.execute(text("SELECT 1"))
     return {"status": "ok"}
+
+
+app.include_router(postings.router)
