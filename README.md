@@ -6,7 +6,7 @@ A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.
 
-**Status:** Stages 1–3 complete (ingest, REST API, fit scoring, 99 tests). Next: Stage 4 (GitHub Actions CI).
+**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Next: Stage 5 (AWS).
 
 ## Stack
 Python 3.12 · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker Compose
@@ -96,6 +96,25 @@ docker exec -it jobagg-db psql -U jobagg -d jobagg
 SELECT company, title, location, term FROM postings WHERE is_open ORDER BY first_seen_at DESC;
 ```
 
+## CI and the daily ingest
+
+Two GitHub Actions workflows live in `.github/workflows/`:
+
+| Workflow | When | What |
+|---|---|---|
+| `ci.yml` | Every push and pull request | Starts a throwaway Postgres 16 service container, runs `alembic upgrade head`, `alembic check` (models and migrations match), then the full test suite |
+| `ingest.yml` | Daily at 11:00 UTC, or manually from the Actions tab | Runs migrations and `python -m app.ingest` against the hosted database in the `DATABASE_URL` secret. Fails (and GitHub emails you) if no company could be ingested |
+
+One-time setup for the daily ingest (free Neon Postgres):
+1. Create a project at [neon.tech](https://neon.tech) (Postgres 16) and copy its connection string
+   (`postgresql://...neon.tech/neondb?sslmode=require`). It can be pasted as is: the app converts
+   `postgresql://` to the psycopg 3 driver automatically.
+2. In the GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**,
+   name `DATABASE_URL`, value the connection string.
+3. **Actions → Daily ingest → Run workflow** to run it once now.
+
+Note: GitHub turns off scheduled workflows in public repos after 60 days without commits.
+
 ## Adding a company
 
 Find the board token in the company's careers URL (`boards.greenhouse.io/<token>`,
@@ -130,7 +149,7 @@ skills.yaml         my skills and weights for fit scoring
 1. ~~Ingest from Greenhouse, Lever, Ashby into Postgres~~
 2. ~~FastAPI: `GET /postings` (filters + pagination), `GET /postings/{id}`, `GET /stats`; indexes~~
 3. ~~Fit scoring + API and database tests~~
-4. GitHub Actions: tests on every push, scheduled daily ingest
+4. ~~GitHub Actions: tests on every push, scheduled daily ingest~~
 5. Deploy to AWS (RDS + EC2/Lambda)
 6. Optional React front end
 
