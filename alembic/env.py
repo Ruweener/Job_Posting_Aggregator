@@ -9,12 +9,14 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
-# Use the same DATABASE_URL as the app (from .env or the environment).
+# Use the same DATABASE_URL as the app (from .env or the environment), unless the caller
+# already set a URL. The test suite does that to migrate the separate test database.
 # '%' is escaped because Alembic's config parser treats it as special.
 from app.config import DATABASE_URL
 from app.models import Base
 
-config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

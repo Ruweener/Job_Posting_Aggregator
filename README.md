@@ -4,7 +4,7 @@ A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.
 
-**Status:** Stages 1�2 complete (ingest + REST API). Next: Stage 3 (fit scoring + tests).
+**Status:** Stages 1–3 complete (ingest, REST API, fit scoring, 99 tests). Next: Stage 4 (GitHub Actions CI).
 
 ## Stack
 Python 3.12 · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker Compose
@@ -29,6 +29,11 @@ companies.yaml ──> fetch() ──> parse() ──> NormalizedPosting ──>
   everything.
 - **Term detection:** `Winter 2027` / `Summer 2027` / etc. from the title, falling back to the
   description, skipping graduation dates ("graduating in spring 2028").
+- **Fit scoring (0–10):** each skill in `skills.yaml` has a weight and regex patterns;
+  `fit_score = min(10, round(10 × matched weight ÷ full_match_weight))`. Each skill counts once,
+  so long descriptions don't win by repetition. Edit `skills.yaml` and re-run ingest to re-score.
+- **Flags:** `in_target_area` (Ontario or remote in Canada) and `coop_required` (the posting says
+  you must be in a co-op program; some also offer a regular internship track, so read before skipping).
 - **Polite to APIs:** sequential requests, 1 s between companies, 20 s timeout, no scraping or logins.
 
 ## Setup (Windows, PowerShell)
@@ -54,8 +59,16 @@ python -m app.check_db
 
 ```powershell
 python -m app.ingest      # fetch all boards in companies.yaml and upsert internships
-pytest                    # run the test suite (offline: uses saved JSON in tests/fixtures)
+pytest                    # run the test suite
 ```
+
+**Tests** (`pytest`, 99 tests):
+- Parsers, filters and scoring run offline against trimmed real API responses in `tests/fixtures/`;
+  HTTP is mocked with `respx`.
+- Database and API tests use a separate `jobagg_test` database (created and migrated with
+  Alembic automatically). Each test runs in a transaction that is rolled back, so tests are
+  isolated and the dev database is never touched. Set `TEST_DATABASE_URL` to use another server.
+- If Postgres isn't running, the database tests are skipped and the rest still run.
 
 Run the API:
 
@@ -65,12 +78,12 @@ uvicorn app.main:app --reload    # then open http://127.0.0.1:8000/docs
 
 | Endpoint | What it returns |
 |---|---|
-| `GET /postings` | Open internships, newest first. Filters: `term`, `location` (substring), `remote`, `company`, `q` (keyword in title/description), `min_score`, `include_closed`. Paging: `limit` (1�100), `offset`. |
+| `GET /postings` | Open internships, newest first. Filters: `term`, `location` (substring), `remote`, `company`, `q` (keyword in title/description), `min_score`, `in_target_area`, `hide_coop_required`, `include_closed`. Sort: `sort=newest` (default) or `sort=score`. Paging: `limit` (1–100), `offset`. |
 | `GET /postings/{id}` | One posting including its full description; 404 if missing |
 | `GET /stats` | Totals plus counts by company, by week posted (`weeks`, default 12) and by term, as raw SQL `GROUP BY` |
 | `GET /health` | `{"status": "ok"}` if the API can reach the database |
 
-Example: `GET /postings?location=toronto&term=Winter%202027`
+Example: `GET /postings?in_target_area=true&sort=score&term=Winter%202027`
 
 Look at the data directly:
 
@@ -99,6 +112,7 @@ app/
   models.py         Posting table
   schemas.py        NormalizedPosting (common shape for all boards)
   filters.py        is_internship, detect_term, is_remote
+  scoring.py        fit score from skills.yaml, co-op and target-area flags
   fetchers/         greenhouse.py, lever.py, ashby.py, html_text.py
   ingest.py         python -m app.ingest
   main.py           FastAPI app (uvicorn app.main:app)
@@ -106,13 +120,14 @@ app/
 alembic/            database migrations
 tests/              pytest suite + fixtures/ (trimmed real API responses)
 companies.yaml      which boards to ingest
+skills.yaml         my skills and weights for fit scoring
 ```
 
 ## Roadmap
 
 1. ~~Ingest from Greenhouse, Lever, Ashby into Postgres~~
 2. ~~FastAPI: `GET /postings` (filters + pagination), `GET /postings/{id}`, `GET /stats`; indexes~~
-3. Fit scoring + API and database tests
+3. ~~Fit scoring + API and database tests~~
 4. GitHub Actions: tests on every push, scheduled daily ingest
 5. Deploy to AWS (RDS + EC2/Lambda)
 6. Optional React front end
