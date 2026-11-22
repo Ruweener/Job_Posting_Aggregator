@@ -1,0 +1,17 @@
+# My skills, with weights for fit scoring (higher = matters more to me / stronger in it).
+# patterns are regular expressions matched case-insensitively against title + description.
+# \b is a word boundary, so "java" doesn't match "javascript".
+# full_match_weight: matched weight that counts as a perfect 10. Real postings mention only
+# 2-3 of my skills, so dividing by the weight of ALL skills squeezed every score into 0-2.
+full_match_weight: 6
+
+skills:
+  - { name: React,      weight: 3, patterns: ['\breact(\.js|js)?\b'] }
+  - { name: TypeScript, weight: 2, patterns: ['\btypescript\b'] }
+  - { name: JavaScript, weight: 2, patterns: ['\bjavascript\b'] }
+  - { name: Python,     weight: 2, patterns: ['\bpython\b'] }
+  - { name: SQL,        weight: 2, patterns: ['\bsql\b', '\bpostgres(ql)?\b', '\bmysql\b'] }
+  - { name: Java,       weight: 2, patterns: ['\bjava\b'] }
+  - { name: Node.js,    weight: 1, patterns: ['\bnode(\.js|js)?\b', '\bexpress(\.js|js)?\b'] }
+  - { name: JUnit,      weight: 1, patterns: ['\bjunit\b'] }
+  - { name: Docker,     weight: 1, patterns: ['\bdocker\b'] }

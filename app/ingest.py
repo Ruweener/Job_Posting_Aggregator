@@ -17,6 +17,7 @@ from app.fetchers import ashby, greenhouse, lever
 from app.filters import detect_term, is_internship
 from app.models import Posting
 from app.schemas import NormalizedPosting
+from app.scoring import coop_required, in_target_area, score
 
 log = logging.getLogger("ingest")
 
@@ -36,6 +37,7 @@ def load_companies(path: Path = COMPANIES_FILE) -> list[dict]:
 
 def to_row(p: NormalizedPosting) -> dict:
     """NormalizedPosting -> dict of column values for the postings table."""
+    fit_score, matched_skills = score(p.title, p.description_text)
     return {
         "source": p.source,
         "source_job_id": p.source_job_id,
@@ -48,18 +50,24 @@ def to_row(p: NormalizedPosting) -> dict:
         "term": detect_term(p.title, p.description_text),
         "posted_at": p.posted_at,
         "is_open": True,
+        "fit_score": fit_score,
+        "matched_skills": matched_skills,
+        "coop_required": coop_required(p.description_text),
+        "in_target_area": in_target_area(p.location, p.remote),
     }
 
 
 def upsert_postings(session: Session, rows: list[dict]) -> None:
     """INSERT ... ON CONFLICT (source, source_job_id) DO UPDATE.
-    New jobs are inserted; jobs already in the table get their fields refreshed.
-    first_seen_at and fit_score are left alone on update."""
+    New jobs are inserted; jobs already in the table get their fields refreshed,
+    including scores (so a skills.yaml change applies on the next run).
+    first_seen_at is never overwritten."""
     if not rows:
         return
     stmt = insert(Posting).values(rows)
     # "excluded" is Postgres's name for the row we tried to insert
-    updatable = ["company", "title", "location", "url", "remote", "description_text", "term", "posted_at"]
+    updatable = ["company", "title", "location", "url", "remote", "description_text", "term", "posted_at",
+                 "fit_score", "matched_skills", "coop_required", "in_target_area"]
     stmt = stmt.on_conflict_do_update(
         constraint="uq_postings_source_job",
         set_={**{col: stmt.excluded[col] for col in updatable},

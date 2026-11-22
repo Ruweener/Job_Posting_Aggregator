@@ -56,9 +56,12 @@ class Posting(Base):
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     is_open: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    # Filled in by the scoring module in Stage 3
+    # Filled in by app/scoring.py on every ingest (so editing skills.yaml re-scores everything)
     fit_score: Mapped[int | None] = mapped_column(Integer)
     matched_skills: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
+    # server_default gives existing rows a value when the migration adds the column
+    coop_required: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    in_target_area: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     def __repr__(self) -> str:
         return f"<Posting {self.id} {self.company!r} {self.title!r}>"
