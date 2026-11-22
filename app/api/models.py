@@ -24,6 +24,8 @@ class PostingSummary(BaseModel):
     is_open: bool
     fit_score: int | None
     matched_skills: list[str] | None
+    coop_required: bool
+    in_target_area: bool
 
 
 class PostingDetail(PostingSummary):
