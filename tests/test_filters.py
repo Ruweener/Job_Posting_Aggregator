@@ -58,3 +58,15 @@ def test_is_remote():
     # Structured field wins over location text
     assert is_remote("Toronto", workplace_type="Remote")
     assert not is_remote("Remote friendly", workplace_type="Hybrid")
+
+
+# Regression tests from real Stripe descriptions (Step 5): graduation dates are not terms.
+def test_detect_term_ignores_graduation_dates():
+    text = "with the expectation of graduating in December 2027 or spring/summer 2028. Experience with SQL"
+    assert detect_term("Data Analyst, Intern", text) == "Unknown"
+
+
+def test_detect_term_handles_season_of_year_and_skips_later_graduation_date():
+    text = ("We are excited to offer internships for the summer of 2027. Candidates should have "
+            "the expectation of graduating in winter 2027 or spring/summer 2028.")
+    assert detect_term("Master's Machine Learning Engineer, Intern", text) == "Summer 2027"
