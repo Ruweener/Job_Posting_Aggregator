@@ -1,0 +1,52 @@
+name: Daily ingest
+
+on:
+  schedule:
+    # Every day at 11:00 UTC (6 or 7 AM in Toronto). GitHub may start scheduled runs a few
+    # minutes late when it's busy. Cron fields: minute hour day-of-month month day-of-week.
+    - cron: "0 11 * * *"
+  workflow_dispatch:      # adds a "Run workflow" button on the Actions tab for manual runs
+
+# Never run two ingests at once against the same database
+concurrency:
+  group: daily-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Stored in GitHub: Settings -> Secrets and variables -> Actions -> DATABASE_URL.
+      # GitHub hides secret values in logs, and they're never in the repo.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Check that the database secret is set
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::The DATABASE_URL secret is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply any new migrations
+        # Safe to run every time: Alembic only applies migrations the database hasn't had yet
+        run: alembic upgrade head
+
+      - name: Ingest postings
+        # Exits 1 if no company could be ingested, which marks the run failed and emails you
+        run: python -m app.ingest

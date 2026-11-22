@@ -91,18 +91,19 @@ def close_missing(session: Session, source: str, company: str, seen_ids: set[str
     return result.rowcount
 
 
-def ingest_company(session: Session, client: httpx.Client, company: dict) -> None:
+def ingest_company(session: Session, client: httpx.Client, company: dict) -> bool:
+    """Returns True if the company's board was fetched and saved, False if it was skipped."""
     name, source, token = company["name"], company["source"], company["token"]
     fetcher = FETCHERS.get(source)
     if fetcher is None:
         log.warning("%s: no fetcher for source %r yet, skipping", name, source)
-        return
+        return False
 
     try:
         raw = fetcher.fetch(client, token)
     except httpx.HTTPError as exc:
         log.error("%s: fetch failed (%s), skipping; existing postings left as they are", name, exc)
-        return
+        return False
 
     postings = [p for p in fetcher.parse(raw, company=name) if is_internship(p.title, p.employment_type)]
     # Keyed by job ID: a board listing the same ID twice would make ON CONFLICT fail
@@ -112,17 +113,23 @@ def ingest_company(session: Session, client: httpx.Client, company: dict) -> Non
     closed = close_missing(session, source, name, {r["source_job_id"] for r in rows})
     session.commit()  # one transaction per company: all of it is saved, or none of it
     log.info("%s: %d internships upserted, %d closed", name, len(rows), closed)
+    return True
 
 
-def main() -> None:
+def main() -> int:
+    """Returns the process exit code: 0 if at least one company worked, 1 if none did.
+    A scheduled job that silently does nothing is worse than one that fails loudly."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     companies = load_companies()
+    succeeded = 0
     with httpx.Client(timeout=20.0, headers={"User-Agent": USER_AGENT}) as client, SessionLocal() as session:
         for i, company in enumerate(companies):
             if i:
                 time.sleep(DELAY_BETWEEN_COMPANIES)
-            ingest_company(session, client, company)
+            succeeded += ingest_company(session, client, company)  # True counts as 1
+    log.info("Done: %d of %d companies ingested", succeeded, len(companies))
+    return 0 if succeeded else 1
 
 
 if __name__ == "__main__":  # runs only via `python -m app.ingest`, not on import
-    main()
+    raise SystemExit(main())

@@ -1,7 +1,9 @@
-"""Unit tests for the database-free parts of ingest. The upsert itself is checked
-by running ingest twice against Postgres (see README); DB tests come in Stage 3."""
+"""Unit tests for the database-free parts of ingest.
+Upserts and closing are tested against Postgres in test_db_ingest.py."""
+import contextlib
 from datetime import datetime, timezone
 
+import app.ingest as ingest
 from app.ingest import load_companies, to_row
 from app.schemas import NormalizedPosting
 
@@ -33,3 +35,12 @@ def test_to_row_fills_term_and_opens_posting():
     assert row["term"] == "Winter 2027"
     assert row["is_open"] is True
     assert "employment_type" not in row  # a hint for filtering, not a column
+
+
+def test_main_exits_1_when_every_company_fails(monkeypatch):
+    # monkeypatch swaps attributes for this test only and puts them back afterwards.
+    # nullcontext() stands in for a database session, so no database is needed.
+    monkeypatch.setattr(ingest, "load_companies", lambda: [{"name": "A", "source": "greenhouse", "token": "a"}])
+    monkeypatch.setattr(ingest, "ingest_company", lambda session, client, company: False)
+    monkeypatch.setattr(ingest, "SessionLocal", contextlib.nullcontext)
+    assert ingest.main() == 1
