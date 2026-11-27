@@ -6,7 +6,7 @@ A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.
 
-**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Next: Stage 5 (AWS).
+**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Stage 5 (AWS) in progress: the API runs in Docker.
 
 ## Stack
 Python 3.12 · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker Compose
@@ -52,7 +52,7 @@ pip install -r requirements.txt
 copy .env.example .env
 
 # 3. Start Postgres (host port 5433) and create the tables
-docker compose up -d --wait
+docker compose up -d --wait db
 alembic upgrade head
 python -m app.check_db
 ```
@@ -64,7 +64,7 @@ python -m app.ingest      # fetch all boards in companies.yaml and upsert intern
 pytest                    # run the test suite
 ```
 
-**Tests** (`pytest`, 99 tests):
+**Tests** (`pytest`, 103 tests):
 - Parsers, filters and scoring run offline against trimmed real API responses in `tests/fixtures/`;
   HTTP is mocked with `respx`.
 - Database and API tests use a separate `jobagg_test` database (created and migrated with
@@ -95,6 +95,22 @@ docker exec -it jobagg-db psql -U jobagg -d jobagg
 ```sql
 SELECT company, title, location, term FROM postings WHERE is_open ORDER BY first_seen_at DESC;
 ```
+
+## Run in Docker
+
+The `Dockerfile` packages the API. `docker compose up` starts Postgres and the API together:
+
+```powershell
+docker compose up -d --build --wait      # build the image, start db + api
+docker compose run --rm api alembic upgrade head   # migrations, with the image's code
+docker compose run --rm api python -m app.ingest   # ingest from inside a container
+docker compose logs -f api               # follow the API's logs
+docker compose down                      # stop both (data is kept in the pgdata volume)
+```
+
+The API is then at http://localhost:8000/docs. Inside Docker's network the API reaches
+Postgres at `db:5432`, so `docker-compose.yml` builds that `DATABASE_URL` from the `.env` values.
+`.dockerignore` keeps `.env` out of the image: the database URL is always passed in at run time.
 
 ## CI and the daily ingest
 
