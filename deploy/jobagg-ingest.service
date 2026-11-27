@@ -1,0 +1,25 @@
+# systemd service: runs the ingest once, then exits. The timer (jobagg-ingest.timer) starts it daily.
+# Install on the EC2 server:
+#   sudo cp deploy/jobagg-ingest.* /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now jobagg-ingest.timer
+# Run it now by hand:   sudo systemctl start jobagg-ingest.service
+# See its logs:         journalctl -u jobagg-ingest -n 30 --no-pager
+
+[Unit]
+Description=Ingest internship postings into RDS
+# Docker must be running before this can start a container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+# oneshot = a job that runs to completion, not a long-running server
+Type=oneshot
+# ec2-user is in the docker group, so it doesn't need root
+User=ec2-user
+# Apply any new migrations first (does nothing if the database is already up to date),
+# the same order as the GitHub ingest workflow. If this fails, the ingest doesn't run.
+ExecStartPre=/usr/bin/docker run --rm --env-file /home/ec2-user/jobagg.env jobagg-api alembic upgrade head
+# --rm deletes the container afterwards; the secret comes from the env file, never the image
+ExecStart=/usr/bin/docker run --rm --env-file /home/ec2-user/jobagg.env jobagg-api python -m app.ingest

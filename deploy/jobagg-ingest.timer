@@ -1,0 +1,16 @@
+# systemd timer: starts jobagg-ingest.service (same name, .service) every day.
+# Check when it last ran and runs next:   systemctl list-timers jobagg-ingest.timer
+
+[Unit]
+Description=Run the internship ingest daily
+
+[Timer]
+# Every day at 11:30 UTC (the server's clock is UTC), half an hour after the GitHub ingest
+# into Neon, so the job boards aren't hit by both at once.
+OnCalendar=*-*-* 11:30:00 UTC
+# If the server was off at 11:30, run as soon as it's back instead of skipping the day
+Persistent=true
+
+[Install]
+# Start this timer automatically when the server boots
+WantedBy=timers.target

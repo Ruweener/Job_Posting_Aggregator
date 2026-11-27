@@ -17,3 +17,6 @@ tests/
 *.md
 .vscode/
 .idea/
+
+# Server config files, installed on EC2 directly, not part of the app
+deploy/
