@@ -36,6 +36,7 @@ function write(f: PostingFilters): string {
   const qs = p.toString()
   return qs ? `?${qs}` : window.location.pathname
 }
+// (write() leaves out ?posting on purpose: changing a filter happens with the detail panel closed.)
 
 /** Like useState, but the value is stored in the page URL. */
 export function useFiltersInUrl(): [PostingFilters, (f: PostingFilters) => void] {
@@ -48,7 +49,12 @@ export function useFiltersInUrl(): [PostingFilters, (f: PostingFilters) => void]
 
   // Back/forward buttons change the URL without calling setFilters, so re-read it then
   useEffect(() => {
-    const onPop = () => setState(read())
+    // Keep the same object if nothing changed (e.g. only ?posting changed), so the list isn't reloaded
+    const onPop = () =>
+      setState((prev) => {
+        const next = read()
+        return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
+      })
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fetchPostings, fetchStats, PAGE_SIZE, type PostingFilters, type PostingPage } from './api'
 import { PostingCard } from './PostingCard'
+import { PostingDetail } from './PostingDetail'
+import { useOpenPosting } from './useOpenPosting'
 import { useFiltersInUrl } from './useFiltersInUrl'
 import './App.css'
 
@@ -8,6 +10,7 @@ export default function App() {
   // Filters live in the URL (?term=Winter+2027&sort=score), so a filtered view can be bookmarked
   // or shared, and the browser's back button works.
   const [filters, setFilters] = useFiltersInUrl()
+  const [openId, setOpen] = useOpenPosting() // detail panel, ?posting=<id>
   const [search, setSearch] = useState(filters.q) // what's typed, before the debounce
   const [terms, setTerms] = useState<string[]>([])
 
@@ -131,7 +134,7 @@ export default function App() {
       </div>
 
       <ul className={`list ${loading ? 'is-loading' : ''}`}>
-        {page?.items.map((p) => <PostingCard key={p.id} posting={p} />)}
+        {page?.items.map((p) => <PostingCard key={p.id} posting={p} onOpen={setOpen} />)}
       </ul>
 
       {page && total === 0 && !loading && <p className="empty">No postings match these filters.</p>}
@@ -152,6 +155,8 @@ export default function App() {
           </button>
         </nav>
       )}
+
+      {openId !== null && <PostingDetail id={openId} onClose={() => setOpen(null)} />}
     </div>
   )
 }

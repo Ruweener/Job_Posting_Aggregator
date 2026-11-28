@@ -1,4 +1,5 @@
 import type { PostingSummary } from './api'
+import { urlWithPosting } from './useOpenPosting'
 
 // "2026-11-06T18:41:27Z" -> "Nov 6"
 const dateFmt = new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric' })
@@ -10,7 +11,7 @@ function scoreClass(score: number | null): string {
   return 'score low'
 }
 
-export function PostingCard({ posting: p }: { posting: PostingSummary }) {
+export function PostingCard({ posting: p, onOpen }: { posting: PostingSummary; onOpen: (id: number) => void }) {
   const posted = p.posted_at ?? p.first_seen_at
   return (
     <li className="card">
@@ -19,8 +20,18 @@ export function PostingCard({ posting: p }: { posting: PostingSummary }) {
       </div>
       <div className="card-body">
         <h2 className="card-title">
-          {/* rel="noreferrer" stops the job board's page from controlling this tab */}
-          <a href={p.url} target="_blank" rel="noreferrer">{p.title}</a>
+          {/* A real link (so middle-click / "open in new tab" work), but a normal click opens the
+              detail panel in place instead of loading a new page */}
+          <a
+            href={urlWithPosting(p.id)}
+            onClick={(e) => {
+              if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return
+              e.preventDefault()
+              onOpen(p.id)
+            }}
+          >
+            {p.title}
+          </a>
         </h2>
         <p className="card-meta">
           <strong>{p.company}</strong>
@@ -40,6 +51,10 @@ export function PostingCard({ posting: p }: { posting: PostingSummary }) {
           {p.matched_skills?.map((s) => <span key={s} className="tag skill">{s}</span>)}
         </div>
       </div>
+      {/* rel="noreferrer" stops the job board's page from being able to control this tab */}
+      <a className="card-apply" href={p.url} target="_blank" rel="noreferrer" title="Open the posting on the job board">
+        Apply ↗
+      </a>
     </li>
   )
 }

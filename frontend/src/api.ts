@@ -21,6 +21,12 @@ export interface PostingSummary {
   in_target_area: boolean
 }
 
+// GET /postings/{id} adds the full description (left out of list responses to keep them small)
+export interface PostingDetail extends PostingSummary {
+  source_job_id: string
+  description_text: string | null
+}
+
 export interface PostingPage {
   total: number
   limit: number
@@ -70,6 +76,10 @@ export function fetchPostings(f: PostingFilters, signal?: AbortSignal): Promise<
   if (f.in_target_area) params.set('in_target_area', 'true')
   if (f.hide_coop_required) params.set('hide_coop_required', 'true')
   return getJson<PostingPage>(`/postings?${params}`, signal)
+}
+
+export function fetchPosting(id: number, signal?: AbortSignal): Promise<PostingDetail> {
+  return getJson<PostingDetail>(`/postings/${id}`, signal)
 }
 
 export function fetchStats(signal?: AbortSignal): Promise<Stats> {
