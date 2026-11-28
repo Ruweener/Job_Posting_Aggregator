@@ -1,4 +1,4 @@
-﻿# Internship Posting Aggregator
+# Internship Posting Aggregator
 
 [![CI](https://github.com/Ruweener/Job_Posting_Aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/Ruweener/Job_Posting_Aggregator/actions/workflows/ci.yml)
 
@@ -6,17 +6,17 @@ A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.
 
-**Status:** Stages 1â€“4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Stage 5 complete: deployed on AWS (EC2 + RDS) with a daily ingest. Next: Stage 6 (React front end).
+**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Stage 5 complete: deployed on AWS (EC2 + RDS) with a daily ingest. Next: Stage 6 (React front end).
 
 ## Stack
-Python 3.12 Â· FastAPI Â· PostgreSQL 16 Â· SQLAlchemy 2 Â· Alembic Â· httpx Â· pytest Â· respx Â· Docker Â· GitHub Actions Â· AWS (EC2, RDS)
+Python 3.12 · FastAPI · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker · GitHub Actions · AWS (EC2, RDS)
 
 ## How it works
 
 ```
-companies.yaml â”€â”€> fetch() â”€â”€> parse() â”€â”€> NormalizedPosting â”€â”€> is_internship? â”€â”€> upsert into Postgres
+companies.yaml ──> fetch() ──> parse() ──> NormalizedPosting ──> is_internship? ──> upsert into Postgres
   (which boards)   (HTTP only)  (pure, per board)  (one shape)        (filters.py)       (ON CONFLICT)
-                                                                                     â””â”€> close postings no longer listed
+                                                                                     └─> close postings no longer listed
 ```
 
 - **One fetcher per board** (`app/fetchers/greenhouse.py`, `lever.py`, `ashby.py`). Each has a
@@ -31,8 +31,8 @@ companies.yaml â”€â”€> fetch() â”€â”€> parse() â”€â”
   everything.
 - **Term detection:** `Winter 2027` / `Summer 2027` / etc. from the title, falling back to the
   description, skipping graduation dates ("graduating in spring 2028").
-- **Fit scoring (0â€“10):** each skill in `skills.yaml` has a weight and regex patterns;
-  `fit_score = min(10, round(10 Ã— matched weight Ã· full_match_weight))`. Each skill counts once,
+- **Fit scoring (0–10):** each skill in `skills.yaml` has a weight and regex patterns;
+  `fit_score = min(10, round(10 × matched weight ÷ full_match_weight))`. Each skill counts once,
   so long descriptions don't win by repetition. Edit `skills.yaml` and re-run ingest to re-score.
 - **Flags:** `in_target_area` (Ontario or remote in Canada) and `coop_required` (the posting says
   you must be in a co-op program; some also offer a regular internship track, so read before skipping).
@@ -80,7 +80,7 @@ uvicorn app.main:app --reload    # then open http://127.0.0.1:8000/docs
 
 | Endpoint | What it returns |
 |---|---|
-| `GET /postings` | Open internships, newest first. Filters: `term`, `location` (substring), `remote`, `company`, `q` (keyword in title/description), `min_score`, `in_target_area`, `hide_coop_required`, `include_closed`. Sort: `sort=newest` (default) or `sort=score`. Paging: `limit` (1â€“100), `offset`. |
+| `GET /postings` | Open internships, newest first. Filters: `term`, `location` (substring), `remote`, `company`, `q` (keyword in title/description), `min_score`, `in_target_area`, `hide_coop_required`, `include_closed`. Sort: `sort=newest` (default) or `sort=score`. Paging: `limit` (1–100), `offset`. |
 | `GET /postings/{id}` | One posting including its full description; 404 if missing |
 | `GET /stats` | Totals plus counts by company, by week posted (`weeks`, default 12) and by term, as raw SQL `GROUP BY` |
 | `GET /health` | `{"status": "ok"}` if the API can reach the database |
@@ -142,9 +142,9 @@ One-time setup for the daily ingest (free Neon Postgres):
 1. Create a project at [neon.tech](https://neon.tech) (Postgres 16) and copy its connection string
    (`postgresql://...neon.tech/neondb?sslmode=require`). It can be pasted as is: the app converts
    `postgresql://` to the psycopg 3 driver automatically.
-2. In the GitHub repo: **Settings â†’ Secrets and variables â†’ Actions â†’ New repository secret**,
+2. In the GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**,
    name `DATABASE_URL`, value the connection string.
-3. **Actions â†’ Daily ingest â†’ Run workflow** to run it once now.
+3. **Actions → Daily ingest → Run workflow** to run it once now.
 
 Note: GitHub turns off scheduled workflows in public repos after 60 days without commits.
 
@@ -153,12 +153,12 @@ Note: GitHub turns off scheduled workflows in public repos after 60 days without
 The API runs on AWS in the `ca-central-1` (Canada Central) region:
 
 ```
-Internet â”€â”€:8000â”€â”€> EC2 t3.micro (Amazon Linux 2023)
+Internet ──:8000──> EC2 t3.micro (Amazon Linux 2023)
                       Docker container: FastAPI + uvicorn
                       systemd timer: daily ingest container
-                         â”‚
-                         â”‚ port 5432, private network only
-                         â–¼
+                         │
+                         │ port 5432, private network only
+                         ▼
                     RDS PostgreSQL 18 (db.t4g.micro, no public address)
 ```
 
