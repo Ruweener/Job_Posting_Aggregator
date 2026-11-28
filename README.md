@@ -6,10 +6,10 @@ A Python service that pulls internship postings from public job-board APIs
 (Greenhouse, Lever, Ashby), stores them in PostgreSQL, and (in later stages)
 scores them against my skills and serves them through a FastAPI REST API.
 
-**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Stage 5 (AWS) in progress: the API runs in Docker.
+**Status:** Stages 1–4 complete (ingest, REST API, fit scoring, 103 tests, CI + scheduled ingest). Stage 5 complete: deployed on AWS (EC2 + RDS) with a daily ingest. Next: Stage 6 (React front end).
 
 ## Stack
-Python 3.12 · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker Compose
+Python 3.12 · FastAPI · PostgreSQL 16 · SQLAlchemy 2 · Alembic · httpx · pytest · respx · Docker · GitHub Actions · AWS (EC2, RDS)
 
 ## How it works
 
@@ -131,6 +131,80 @@ One-time setup for the daily ingest (free Neon Postgres):
 
 Note: GitHub turns off scheduled workflows in public repos after 60 days without commits.
 
+## Deployment (AWS)
+
+The API runs on AWS in the `ca-central-1` (Canada Central) region:
+
+```
+Internet ──:8000──> EC2 t3.micro (Amazon Linux 2023)
+                      Docker container: FastAPI + uvicorn
+                      systemd timer: daily ingest container
+                         │
+                         │ port 5432, private network only
+                         ▼
+                    RDS PostgreSQL 18 (db.t4g.micro, no public address)
+```
+
+**Network security** uses two security groups (AWS's per-resource firewalls):
+
+| Security group | Inbound rules |
+|---|---|
+| `jobagg-api-sg` (EC2) | SSH (22) from my IP only; API (8000) from anywhere |
+| `jobagg-db-sg` (RDS) | PostgreSQL (5432) only from `jobagg-api-sg` |
+
+The database has no public IP. The only thing that can connect to it is a server in the API's
+security group. The rule names a group rather than an IP, so it still works if the server is replaced.
+
+**Secrets:** the RDS connection string is only in `~/jobagg.env` on the server (readable only by
+its owner) and is passed to containers with `docker run --env-file`. It's never in the repo or the image
+(`.dockerignore` excludes `.env`). The connection uses TLS (`sslmode=require`).
+
+**Running the API:**
+
+```bash
+docker build -t jobagg-api .
+docker run -d --name jobagg-api --restart unless-stopped   --env-file ~/jobagg.env -p 8000:8000 jobagg-api
+```
+
+`--restart unless-stopped` brings the API back after a crash or a reboot.
+
+**Daily ingest:** `deploy/jobagg-ingest.timer` starts `deploy/jobagg-ingest.service` at 11:30 UTC.
+The service runs `alembic upgrade head` and then `python -m app.ingest`, each in a short-lived
+container from the same image. `Persistent=true` catches up on a missed run if the server was off.
+Logs are in `journalctl -u jobagg-ingest`.
+
+```bash
+sudo cp deploy/jobagg-ingest.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now jobagg-ingest.timer
+```
+
+**Deploying a change:**
+
+```bash
+cd ~/Job_Posting_Aggregator && git pull
+docker build -t jobagg-api .
+docker run --rm --env-file ~/jobagg.env jobagg-api alembic upgrade head
+docker rm -f jobagg-api
+docker run -d --name jobagg-api --restart unless-stopped --env-file ~/jobagg.env -p 8000:8000 jobagg-api
+```
+
+**Account setup:** the root user has MFA and is not used day to day. Work is done as an IAM user
+in an `Admins` group (also with MFA). An AWS Budgets alert emails me when monthly cost passes $5.
+
+There are two hosted databases: the GitHub Actions ingest fills a free Neon Postgres, and the EC2
+timer fills RDS. Both run the same code, configured only by `DATABASE_URL`. (RDS runs Postgres 18;
+CI and local dev use 16. The app uses nothing version-specific.)
+
+**Screenshots** (account ID redacted):
+
+| | |
+|---|---|
+| EC2 instance running | ![EC2 instance](docs/screenshots/ec2-instance.png) |
+| RDS instance (Postgres 18, db.t4g.micro, encrypted storage) | ![RDS instance](docs/screenshots/rds-private.png) |
+| `jobagg-db-sg`: port 5432 open only to the API's security group | ![Security group](docs/screenshots/security-groups.png) |
+| The live API's interactive docs | ![API docs](docs/screenshots/api-docs.png) |
+
 ## Adding a company
 
 Find the board token in the company's careers URL (`boards.greenhouse.io/<token>`,
@@ -155,6 +229,8 @@ app/
   main.py           FastAPI app (uvicorn app.main:app)
   api/              postings.py, stats.py, models.py (response shapes), deps.py
 alembic/            database migrations
+deploy/             systemd service + timer for the daily ingest on EC2
+Dockerfile          API image (also used for migrations and ingest)
 tests/              pytest suite + fixtures/ (trimmed real API responses)
 companies.yaml      which boards to ingest
 skills.yaml         my skills and weights for fit scoring
@@ -166,7 +242,7 @@ skills.yaml         my skills and weights for fit scoring
 2. ~~FastAPI: `GET /postings` (filters + pagination), `GET /postings/{id}`, `GET /stats`; indexes~~
 3. ~~Fit scoring + API and database tests~~
 4. ~~GitHub Actions: tests on every push, scheduled daily ingest~~
-5. Deploy to AWS (RDS + EC2/Lambda)
+5. ~~Deploy to AWS: Docker on EC2, Postgres on RDS, daily ingest with a systemd timer~~
 6. Optional React front end
 
 ## Data sources
