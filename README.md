@@ -96,6 +96,23 @@ docker exec -it jobagg-db psql -U jobagg -d jobagg
 SELECT company, title, location, term FROM postings WHERE is_open ORDER BY first_seen_at DESC;
 ```
 
+## Front end (React)
+
+A React + TypeScript page (Vite) in `frontend/` lists postings with search, filters, sorting and
+paging. The filters are kept in the URL, so a filtered view can be bookmarked. It needs Node 20+
+and the API running on port 8000 (`uvicorn` or `docker compose up`):
+
+```powershell
+cd frontend
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # type-check and build into frontend/dist
+npm run lint
+```
+
+In development, Vite forwards `/api/*` to FastAPI on port 8000 with the `/api` prefix removed
+(`frontend/vite.config.ts`), so the browser sees one origin and no CORS setup is needed.
+
 ## Run in Docker
 
 The `Dockerfile` packages the API. `docker compose up` starts Postgres and the API together:
@@ -243,7 +260,7 @@ skills.yaml         my skills and weights for fit scoring
 3. ~~Fit scoring + API and database tests~~
 4. ~~GitHub Actions: tests on every push, scheduled daily ingest~~
 5. ~~Deploy to AWS: Docker on EC2, Postgres on RDS, daily ingest with a systemd timer~~
-6. Optional React front end
+6. React front end (in progress: postings list done; next: detail view, stats charts, applied status, deploy)
 
 ## Data sources
 

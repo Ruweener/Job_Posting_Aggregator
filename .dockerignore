@@ -20,3 +20,6 @@ tests/
 
 # Server config files, installed on EC2 directly, not part of the app
 deploy/
+
+# React app: not used by the API image yet (step 5 adds a build stage for it)
+frontend/
